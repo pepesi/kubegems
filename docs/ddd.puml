@@ -1,0 +1,29 @@
+@startuml user
+namespace U {
+    package User <<>> {
+        User "1" --> "*" SystemRole 
+        User --> UserAttribute
+        User --> Tenant
+        User --> Projecet
+        User --> Environment
+    }
+    package Cluster <<Aggregate>> {
+        Cluster <--> Tenant
+    }
+    package Tenant <<Aggregate>> {
+        Tenant --> ClusterResourceQuotas
+        Tenant --> Projects
+        Tenant <--> Cluster 
+        package Projects <<Aggregate>> {
+            Project --> Environment
+            Project --> Application
+            package Environment <<Aggregate>> {
+                Environment <--> Application
+                Cluster <-- Environment
+            }
+            package Application <<Aggregate>> {
+                Environment <--> Application
+            }
+        }
+    }
+@enduml

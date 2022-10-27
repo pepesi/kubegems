@@ -1,0 +1,50 @@
+@startuml
+namespace X {
+
+class user
+object tenant
+object project
+object environment
+object application
+object virtualspace
+
+object user_tenant_rel
+object user_project_rel
+object user_environment_rel
+object user_application_rel
+
+user : username
+user : email
+
+tenant : name
+tenant : remark
+
+project : name
+project : remark
+
+environment : name
+environment : remark
+
+application : name
+application : remark
+
+virtualspace : name
+virtualspace : remark
+
+user <- user_tenant_rel
+user_tenant_rel -> tenant
+
+user <- user_project_rel
+user_project_rel -> project
+
+user <- user_environment_rel
+user_environment_rel -> environment
+
+user <- user_application_rel
+user_application_rel -> application
+
+project -> application
+project -> environment
+
+}
+@enduml

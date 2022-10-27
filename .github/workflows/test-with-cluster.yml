@@ -1,0 +1,26 @@
+name: Create Cluster
+
+on:
+  push:
+    branches:
+      - refactor
+
+jobs:
+  create-cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.3.0
+        with:
+          node_image: "kindest/node:v1.24.6"
+          cluster_name: "kind"
+      - name: Get Kubeconfig
+        run: |
+          echo `pwd`
+          ls -alh
+          kind get kubeconfig --name kind > ${GITHUB_WORKSPACE}/pkg/apiserver/aggregate/testdata/kubeconfig/kubecfg1.yaml
+      - name: Run coverage
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic kubegems.io/kubegems/pkg/apiserver/aggregate
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3

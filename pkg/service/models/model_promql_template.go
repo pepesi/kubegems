@@ -118,6 +118,14 @@ func CheckGraphs(graphs []prometheus.MetricGraph, namespace string, tplGetter te
 				}
 				graphs[i].Unit = target.PromqlGenerator.Unit
 			}
+		} else {
+			if err := v.PromqlGenerator.SetTpl(tplGetter); err != nil {
+				return err
+			}
+			if !v.Tpl.Namespaced {
+				return fmt.Errorf("图表: %s 错误！不能查询集群范围资源", v.Name)
+			}
+			graphs[i].Unit = v.PromqlGenerator.Unit
 		}
 	}
 	return nil
