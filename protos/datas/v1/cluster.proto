@@ -1,0 +1,21 @@
+syntax = "proto3";
+package protos.datas.v1;
+option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
+
+
+message Cluster {
+    uint32 id = 1;
+    string name = 2;
+}
+
+message CreateClusterRequest {
+    string name = 1;
+    string kubeconfig = 2;
+}
+
+message CreateClusterResponse {
+    string name = 1;
+    bool succeed = 2;
+    string message = 3;
+}
+

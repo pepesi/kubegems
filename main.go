@@ -12,4 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package kubegems
+package main
+
+import (
+	"kubegems.io/kubegems/pkg/apiserver/infrastructure/orm"
+	"kubegems.io/kubegems/pkg/apiserver/interfaces"
+)
+
+func main() {
+	// gateway()
+	grpc()
+
+}
+
+func T() {
+	db := orm.Init()
+	println("start server")
+	if e := interfaces.InitHTTPServer(db); e != nil {
+		panic(e)
+	}
+}
+
+func gateway() {
+	interfaces.RunGw()
+}
+
+func grpc() {
+	interfaces.RunGrpc()
+}

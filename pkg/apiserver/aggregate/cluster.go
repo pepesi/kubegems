@@ -5,6 +5,7 @@ import (
 
 	"kubegems.io/kubegems/pkg/apiserver/domain/model"
 	"kubegems.io/kubegems/pkg/apiserver/domain/service"
+	"kubegems.io/kubegems/pkg/apiserver/options"
 )
 
 type ClusterService struct {
@@ -37,10 +38,17 @@ func (s *ClusterService) AddClusterViaKubeConfig(name, cfg string) error {
 }
 
 // DeleteCluster 删除集群
-func (s *ClusterService) DeleteCluster(name string) {}
+func (s *ClusterService) DeleteCluster(ctx context.Context, name string) error {
+	cluster, err := s.clusterMgr.GetCluster(ctx, name)
+	if err != nil {
+		return err
+	}
+	return s.clusterMgr.DeleteCluster(ctx, options.Equal("id", cluster.ID))
+}
 
 // AddClusterViaRegist 以注册方式添加集群
-func (s *ClusterService) AddClusterViaRegist(name string) {}
+func (s *ClusterService) AddClusterViaRegist(ctx context.Context, name string) {
+}
 
 // RegistCluster 处理集群注册
 func (s *ClusterService) RegistCluster(name, cfg string) {}
