@@ -13,3 +13,7 @@ deps:
     owner: grpc-ecosystem
     repository: grpc-gateway
     commit: a1ecdc58eccd49aa8bea2a7a9022dc27
+  - remote: buf.build
+    owner: nparikh
+    repository: k8s
+    commit: 1c9cea5e047f4ebdaed4a28118289133

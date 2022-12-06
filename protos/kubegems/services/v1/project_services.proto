@@ -1,0 +1,15 @@
+
+syntax = "proto3";
+package kubegems.services.v1;
+option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
+import "google/api/annotations.proto";
+import "kubegems/datas/v1/project.proto";
+
+service ProjectService {
+    rpc CreateProject(kubegems.datas.v1.CreateProjectRequest) returns (kubegems.datas.v1.CreateProjectResponse) {
+        option (google.api.http) = {
+            post: "/v1/tenant/{tenant}/project"
+            body: "*"
+        };
+    };
+}

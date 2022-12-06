@@ -3,6 +3,7 @@ package kubegems.datas.v1;
 option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
 import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
+import "k8s.io/apimachinery/pkg/api/resource/generated.proto";
 
 
 message Tenant {
@@ -64,4 +65,15 @@ message ListTenantResponse {
     uint32 size = 2;
     string search = 3; 
     repeated Tenant tenats = 4;
+}
+
+message CreateTenantClusterResourceQuotaRequest {
+    string cluster = 1;
+    string tenant = 2;
+    map<string, k8s.io.apimachinery.pkg.api.resource.Quantity> resources = 3;
+}
+
+message CreateTenantClusterResourceQuotaResponse {
+    uint32 code = 1;
+    string message = 2; 
 }

@@ -22,9 +22,11 @@ import (
 
 func main() {
 	if os.Getenv("T") == "http" {
+		println("http")
 		interfaces.RunHTTP()
 	} else if os.Getenv("T") == "grpc" {
-		interfaces.RunHTTP()
+		println("grpc")
+		interfaces.RunGRPC()
 	} else {
 		os.Exit(255)
 	}

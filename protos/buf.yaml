@@ -4,6 +4,8 @@ deps:
   - buf.build/googleapis/googleapis
   - buf.build/envoyproxy/protoc-gen-validate
   - buf.build/grpc-ecosystem/grpc-gateway
+  # not offical
+  - buf.build/nparikh/k8s
 breaking:
   use:
     - FILE

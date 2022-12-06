@@ -11,7 +11,7 @@ message Cluster {
 
 message CreateClusterRequest {
     string name = 1 [(validate.rules).string = {
-        pattern:   "^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$",
+        pattern:   "^\\w+[A-Za-z0-9]$",
         max_bytes: 32,
     }, (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
         description: "The name of cluster you want to use in kubegems"

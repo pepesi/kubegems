@@ -26,4 +26,12 @@ service TenantService {
             get: "/v1/tenant"
         };
     };
+
+    rpc CreateTenantClusterResourceQuota(kubegems.datas.v1.CreateTenantClusterResourceQuotaRequest) returns (kubegems.datas.v1.CreateTenantClusterResourceQuotaResponse) {
+        option (google.api.http) = {
+            post: "/v1/tenant/{tenant}/cluster/{cluster}/resource_quota"
+            body: "*"
+        };
+    };
+
 }

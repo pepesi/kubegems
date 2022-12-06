@@ -15,8 +15,8 @@ type tenantProjectManager struct {
 	projectRepo repository.GenericRepo[*model.Project]
 }
 
-func (mgr *tenantProjectManager) CreateProject(proj *model.Project) error {
-	return nil
+func (mgr *tenantProjectManager) CreateProject(data *model.Project) error {
+	return mgr.projectRepo.Create(data)
 }
 
 func (mgr *tenantProjectManager) ModifyProject(proj *model.Project) error {

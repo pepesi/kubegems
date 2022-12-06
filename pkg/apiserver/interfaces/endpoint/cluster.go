@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"context"
-	"errors"
 
 	agg_services "kubegems.io/kubegems/pkg/apiserver/aggregate"
 	v1 "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1"
@@ -24,8 +23,17 @@ func (s *clusterImpl) CreateCluster(ctx context.Context, req *v1.CreateClusterRe
 	if err != nil {
 		return nil, err
 	}
-
-	return nil, errors.New("not implemented")
+	cluster, err := s.clusterSvc.AddClusterViaKubeConfig(req.Name, req.Kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+	resp := &v1.CreateClusterResponse{
+		Id:      uint32(cluster.ID),
+		Name:    cluster.Name,
+		Succeed: true,
+		Message: "success",
+	}
+	return resp, nil
 }
 
 func (s *clusterImpl) DeleteCluster(ctx context.Context, req *v1.DeleteClusterRequest) (*v1.DeleteClusterResponse, error) {
@@ -33,5 +41,13 @@ func (s *clusterImpl) DeleteCluster(ctx context.Context, req *v1.DeleteClusterRe
 	if err != nil {
 		return nil, err
 	}
-	return nil, errors.New("not implemented")
+	resp := &v1.DeleteClusterResponse{
+		Code:    uint32(v1.StatusCode_STATUS_CODE_UNSPECIFIED),
+		Message: "ok",
+	}
+	if err := s.clusterSvc.DeleteCluster(ctx, req.Name); err != nil {
+		resp.Code = uint32(v1.StatusCode_STATUS_CODE_BAD_REQUEST)
+		resp.Message = err.Error()
+	}
+	return resp, nil
 }

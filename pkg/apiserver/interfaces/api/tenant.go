@@ -96,7 +96,7 @@ func (iface *TenantHTTPInterface) createTeant(req *restful.Request, resp *restfu
 		resp.WriteHeaderAndEntity(400, errs)
 		return
 	}
-	respdata, err := iface.tenantSvc.CreateTenant(req.Request.Context(), reqdata)
+	respdata, err := iface.tenantSvc.CreateTenant(req.Request.Context(), nil)
 	if err != nil {
 		resp.WriteError(400, err)
 		return

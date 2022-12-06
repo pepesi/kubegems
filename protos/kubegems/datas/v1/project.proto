@@ -1,0 +1,21 @@
+syntax = "proto3";
+package kubegems.datas.v1;
+option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
+
+message Project {
+    uint32 id = 1;
+    string name = 2;
+    string intro = 3;
+}
+
+message CreateProjectRequest {
+    string tenant = 1;
+    Project project = 2;
+}
+
+message CreateProjectResponse {
+    uint32 code = 1;
+    string message = 2; 
+    string tenant = 3;
+    Project project = 4;
+}

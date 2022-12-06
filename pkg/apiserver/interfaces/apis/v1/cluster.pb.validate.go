@@ -172,7 +172,7 @@ func (m *CreateClusterRequest) validate(all bool) error {
 	if !_CreateClusterRequest_Name_Pattern.MatchString(m.GetName()) {
 		err := CreateClusterRequestValidationError{
 			field:  "Name",
-			reason: "value does not match regex pattern \"^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$\"",
+			reason: "value does not match regex pattern \"^\\\\w+[A-Za-z0-9]$\"",
 		}
 		if !all {
 			return err
@@ -270,7 +270,7 @@ var _ interface {
 	ErrorName() string
 } = CreateClusterRequestValidationError{}
 
-var _CreateClusterRequest_Name_Pattern = regexp.MustCompile("^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$")
+var _CreateClusterRequest_Name_Pattern = regexp.MustCompile("^\\w+[A-Za-z0-9]$")
 
 // Validate checks the field values on CreateClusterResponse with the rules
 // defined in the proto definition for this message. If any rules are

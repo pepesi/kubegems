@@ -9,6 +9,9 @@
       "name": "ClusterService"
     },
     {
+      "name": "ProjectService"
+    },
+    {
       "name": "TenantService"
     }
   ],
@@ -247,6 +250,101 @@
           "TenantService"
         ]
       }
+    },
+    "/v1/tenant/{tenant}/cluster/{cluster}/resource_quota": {
+      "post": {
+        "operationId": "TenantService_CreateTenantClusterResourceQuota",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateTenantClusterResourceQuotaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cluster",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "resources": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/definitions/resourceQuantity"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      }
+    },
+    "/v1/tenant/{tenant}/project": {
+      "post": {
+        "operationId": "ProjectService_CreateProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "project": {
+                  "$ref": "#/definitions/v1Project"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -258,6 +356,15 @@
         }
       },
       "additionalProperties": {}
+    },
+    "resourceQuantity": {
+      "type": "object",
+      "properties": {
+        "string": {
+          "type": "string"
+        }
+      },
+      "description": "Quantity is a fixed-point representation of a number.\nIt provides convenient marshaling/unmarshaling in JSON and YAML,\nin addition to String() and AsInt64() accessors.\n\nThe serialization format is:\n\n\u003cquantity\u003e        ::= \u003csignedNumber\u003e\u003csuffix\u003e\n  (Note that \u003csuffix\u003e may be empty, from the \"\" case in \u003cdecimalSI\u003e.)\n\u003cdigit\u003e           ::= 0 | 1 | ... | 9\n\u003cdigits\u003e          ::= \u003cdigit\u003e | \u003cdigit\u003e\u003cdigits\u003e\n\u003cnumber\u003e          ::= \u003cdigits\u003e | \u003cdigits\u003e.\u003cdigits\u003e | \u003cdigits\u003e. | .\u003cdigits\u003e\n\u003csign\u003e            ::= \"+\" | \"-\"\n\u003csignedNumber\u003e    ::= \u003cnumber\u003e | \u003csign\u003e\u003cnumber\u003e\n\u003csuffix\u003e          ::= \u003cbinarySI\u003e | \u003cdecimalExponent\u003e | \u003cdecimalSI\u003e\n\u003cbinarySI\u003e        ::= Ki | Mi | Gi | Ti | Pi | Ei\n  (International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\u003cdecimalSI\u003e       ::= m | \"\" | k | M | G | T | P | E\n  (Note that 1024 = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n\u003cdecimalExponent\u003e ::= \"e\" \u003csignedNumber\u003e | \"E\" \u003csignedNumber\u003e\n\nNo matter which of the three exponent forms is used, no quantity may represent\na number greater than 2^63-1 in magnitude, nor may it have more than 3 decimal\nplaces. Numbers larger or more precise will be capped or rounded up.\n(E.g.: 0.1m will rounded up to 1m.)\nThis may be extended in the future if we require larger or smaller quantities.\n\nWhen a Quantity is parsed from a string, it will remember the type of suffix\nit had, and will use the same type again when it is serialized.\n\nBefore serializing, Quantity will be put in \"canonical form\".\nThis means that Exponent/suffix will be adjusted up or down (with a\ncorresponding increase or decrease in Mantissa) such that:\n  a. No precision is lost\n  b. No fractional digits will be emitted\n  c. The exponent (or suffix) is as large as possible.\nThe sign will be omitted unless the number is negative.\n\nExamples:\n  1.5 will be serialized as \"1500m\"\n  1.5Gi will be serialized as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented by a\nfloating point number. That is the whole point of this exercise.\n\nNon-canonical values will still parse as long as they are well formed,\nbut will be re-emitted in their canonical form. (So always use canonical\nform, or don't diff.)\n\nThis format is intended to make it difficult to use these numbers without\nwriting some sort of special handling code in the hopes that that will\ncause implementors to also use a fixed point implementation.\n\n+protobuf=true\n+protobuf.embed=string\n+protobuf.options.marshal=false\n+protobuf.options.(gogoproto.goproto_stringer)=false\n+k8s:deepcopy-gen=true\n+k8s:openapi-gen=true"
     },
     "rpcStatus": {
       "type": "object",
@@ -302,6 +409,36 @@
         },
         "succeed": {
           "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateProjectResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        },
+        "tenant": {
+          "type": "string"
+        },
+        "project": {
+          "$ref": "#/definitions/v1Project"
+        }
+      }
+    },
+    "v1CreateTenantClusterResourceQuotaResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
         },
         "message": {
           "type": "string"
@@ -392,6 +529,21 @@
       "properties": {
         "tenant": {
           "$ref": "#/definitions/v1Tenant"
+        }
+      }
+    },
+    "v1Project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
         }
       }
     },

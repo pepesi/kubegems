@@ -10,7 +10,7 @@ import (
 
 // ClusterService  1.集群服务 2.集群管理 3.集群插件管理
 type ClusterService interface {
-	AddClusterViaKubeConfig(name, cfg string) error
+	AddClusterViaKubeConfig(name, cfg string) (*model.Cluster, error)
 	DeleteCluster(ctx context.Context, name string) error
 	AddClusterViaRegist(ctx context.Context, name string)
 	RegistCluster(name, cfg string)
@@ -28,21 +28,20 @@ type clusterServiceImpl struct {
 	clusterMgr service.ClusterManager
 }
 
-// AddClusterViaKubeConfig 以kubeconfig方式添加集群
-func (s *clusterServiceImpl) AddClusterViaKubeConfig(name, cfg string) error {
+// AddClusterViaKubeConfig  add cluster into kubegems via kubeconfig
+func (s *clusterServiceImpl) AddClusterViaKubeConfig(name, cfg string) (*model.Cluster, error) {
 	cluster := &model.Cluster{
 		ID:         1,
 		Name:       name,
 		KubeConfig: []byte(cfg),
 	}
 	if err := cluster.CheckConnection(); err != nil {
-		return err
+		return nil, err
 	}
-	_, err := s.clusterMgr.CreateCluster(context.Background(), cluster)
-	return err
+	return s.clusterMgr.CreateCluster(context.Background(), cluster)
 }
 
-// DeleteCluster 删除集群
+// DeleteCluster delete the cluster from kubegems
 func (s *clusterServiceImpl) DeleteCluster(ctx context.Context, name string) error {
 	cluster, err := s.clusterMgr.GetCluster(ctx, name)
 	if err != nil {

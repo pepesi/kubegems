@@ -6,13 +6,14 @@ import (
 	"kubegems.io/kubegems/pkg/apiserver/domain/model"
 	"kubegems.io/kubegems/pkg/apiserver/domain/repository"
 	domain "kubegems.io/kubegems/pkg/apiserver/domain/service"
+	v1 "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1"
 	apis "kubegems.io/kubegems/pkg/apiserver/interfaces/dto/v1"
 	"kubegems.io/kubegems/pkg/apiserver/options"
 )
 
 // TenantService 1. 租户管理 2. 租户成员 3. 租户集群资源管理
 type TenantService interface {
-	CreateTenant(ctx context.Context, req *apis.CreateUpdateTenantReq) (*apis.CreateUpdateTenantResp, error)
+	CreateTenant(ctx context.Context, req *v1.CreateTenantRequest) (*model.Tenant, error)
 	GetTenant(ctx context.Context, tenant string) (*apis.RetrieveTenantResp, error)
 	ListTenants(ctx context.Context, opts ...options.Option) (*apis.ListTenantResp, error)
 	DeleteTenant(ctx context.Context, name string) error
@@ -54,17 +55,13 @@ func NewTenantService(
 	}
 }
 
-func (s *tenantServiceImpl) CreateTenant(ctx context.Context, req *apis.CreateUpdateTenantReq) (*apis.CreateUpdateTenantResp, error) {
+func (s *tenantServiceImpl) CreateTenant(ctx context.Context, req *v1.CreateTenantRequest) (*model.Tenant, error) {
 	var (
-		tenant  model.Tenant
-		created apis.CreateUpdateTenantResp
+		tenant model.Tenant
 	)
-	tenant.Name = req.Name
-	tenant.Remark = req.Remark
-	_, err := s.tenantManager.CreateTenant(ctx, &tenant)
-	created.Name = tenant.Name
-	created.Remark = tenant.Remark
-	return &created, err
+	tenant.Name = req.Tenant.Name
+	tenant.Remark = req.Tenant.Intro
+	return s.tenantManager.CreateTenant(ctx, &tenant)
 }
 
 func (s *tenantServiceImpl) GetTenant(ctx context.Context, tenant string) (*apis.RetrieveTenantResp, error) {

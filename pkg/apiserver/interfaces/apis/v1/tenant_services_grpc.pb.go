@@ -22,6 +22,7 @@ type TenantServiceClient interface {
 	DeleteTenant(ctx context.Context, in *DeleteTenantRequest, opts ...grpc.CallOption) (*DeleteTenantResponse, error)
 	ModifyTenant(ctx context.Context, in *ModifyTenantRequest, opts ...grpc.CallOption) (*ModifyTenantResponse, error)
 	ListTenant(ctx context.Context, in *ListTenantRequest, opts ...grpc.CallOption) (*ListTenantResponse, error)
+	CreateTenantClusterResourceQuota(ctx context.Context, in *CreateTenantClusterResourceQuotaRequest, opts ...grpc.CallOption) (*CreateTenantClusterResourceQuotaResponse, error)
 }
 
 type tenantServiceClient struct {
@@ -68,6 +69,15 @@ func (c *tenantServiceClient) ListTenant(ctx context.Context, in *ListTenantRequ
 	return out, nil
 }
 
+func (c *tenantServiceClient) CreateTenantClusterResourceQuota(ctx context.Context, in *CreateTenantClusterResourceQuotaRequest, opts ...grpc.CallOption) (*CreateTenantClusterResourceQuotaResponse, error) {
+	out := new(CreateTenantClusterResourceQuotaResponse)
+	err := c.cc.Invoke(ctx, "/kubegems.services.v1.TenantService/CreateTenantClusterResourceQuota", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TenantServiceServer is the server API for TenantService service.
 // All implementations must embed UnimplementedTenantServiceServer
 // for forward compatibility
@@ -76,6 +86,7 @@ type TenantServiceServer interface {
 	DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error)
 	ModifyTenant(context.Context, *ModifyTenantRequest) (*ModifyTenantResponse, error)
 	ListTenant(context.Context, *ListTenantRequest) (*ListTenantResponse, error)
+	CreateTenantClusterResourceQuota(context.Context, *CreateTenantClusterResourceQuotaRequest) (*CreateTenantClusterResourceQuotaResponse, error)
 	mustEmbedUnimplementedTenantServiceServer()
 }
 
@@ -94,6 +105,9 @@ func (UnimplementedTenantServiceServer) ModifyTenant(context.Context, *ModifyTen
 }
 func (UnimplementedTenantServiceServer) ListTenant(context.Context, *ListTenantRequest) (*ListTenantResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTenant not implemented")
+}
+func (UnimplementedTenantServiceServer) CreateTenantClusterResourceQuota(context.Context, *CreateTenantClusterResourceQuotaRequest) (*CreateTenantClusterResourceQuotaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTenantClusterResourceQuota not implemented")
 }
 func (UnimplementedTenantServiceServer) mustEmbedUnimplementedTenantServiceServer() {}
 
@@ -180,6 +194,24 @@ func _TenantService_ListTenant_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TenantService_CreateTenantClusterResourceQuota_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTenantClusterResourceQuotaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantServiceServer).CreateTenantClusterResourceQuota(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kubegems.services.v1.TenantService/CreateTenantClusterResourceQuota",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantServiceServer).CreateTenantClusterResourceQuota(ctx, req.(*CreateTenantClusterResourceQuotaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TenantService_ServiceDesc is the grpc.ServiceDesc for TenantService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +234,10 @@ var TenantService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTenant",
 			Handler:    _TenantService_ListTenant_Handler,
+		},
+		{
+			MethodName: "CreateTenantClusterResourceQuota",
+			Handler:    _TenantService_CreateTenantClusterResourceQuota_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
