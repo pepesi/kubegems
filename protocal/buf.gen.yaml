@@ -17,6 +17,12 @@ plugins:
       - module=kubegems.io/kubegems/pkg/apiserver/interfaces/apis
       - generate_unbound_methods=true
       - allow_delete_body=true
+  - name: validate
+    out: ../pkg/apiserver/interfaces/apis/
+    opt:
+      - paths=import
+      - module=kubegems.io/kubegems/pkg/apiserver/interfaces/apis
+      - lang=go
   - name: openapiv2
     out: ../openapi-spec
     opt:

@@ -2,7 +2,7 @@ version: v1
 name: buf.build/kubegems.io/kubegems
 deps:
   - buf.build/googleapis/googleapis
-  - buf.build/foxy-project/go-proto-validators
+  - buf.build/envoyproxy/protoc-gen-validate
 breaking:
   use:
     - FILE

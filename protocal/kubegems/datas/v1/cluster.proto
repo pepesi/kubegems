@@ -1,7 +1,7 @@
 syntax = "proto3";
 package kubegems.datas.v1;
 option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "validate/validate.proto";
 
 message Cluster {
     uint32 id = 1;
@@ -9,7 +9,10 @@ message Cluster {
 }
 
 message CreateClusterRequest {
-    string name = 1 [(validator.field) = {regex: "^[a-z0-9]{5,30}$"}];
+    string name = 1 [(validate.rules).string = {
+        pattern:   "^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$",
+        max_bytes: 32,
+    }];
     string kubeconfig = 2;
 }
 
