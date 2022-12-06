@@ -8,23 +8,28 @@ import (
 	"kubegems.io/kubegems/pkg/apiserver/options"
 )
 
-type ClusterService struct {
-	clusterMgr service.ClusterManager
+// ClusterService  1.集群服务 2.集群管理 3.集群插件管理
+type ClusterService interface {
+	AddClusterViaKubeConfig(name, cfg string) error
+	DeleteCluster(ctx context.Context, name string) error
+	AddClusterViaRegist(ctx context.Context, name string)
+	RegistCluster(name, cfg string)
+	EnablePlugin(name, plugin string)
+	DisablePlugin(name, plugin string)
 }
 
-func NewClusterService(mgr service.ClusterManager) *ClusterService {
-	return &ClusterService{
+func NewClusterService(mgr service.ClusterManager) ClusterService {
+	return &clusterServiceImpl{
 		clusterMgr: mgr,
 	}
 }
 
-// 集群服务
-
-// 集群的管理
-// 集群插件管理
+type clusterServiceImpl struct {
+	clusterMgr service.ClusterManager
+}
 
 // AddClusterViaKubeConfig 以kubeconfig方式添加集群
-func (s *ClusterService) AddClusterViaKubeConfig(name, cfg string) error {
+func (s *clusterServiceImpl) AddClusterViaKubeConfig(name, cfg string) error {
 	cluster := &model.Cluster{
 		ID:         1,
 		Name:       name,
@@ -38,7 +43,7 @@ func (s *ClusterService) AddClusterViaKubeConfig(name, cfg string) error {
 }
 
 // DeleteCluster 删除集群
-func (s *ClusterService) DeleteCluster(ctx context.Context, name string) error {
+func (s *clusterServiceImpl) DeleteCluster(ctx context.Context, name string) error {
 	cluster, err := s.clusterMgr.GetCluster(ctx, name)
 	if err != nil {
 		return err
@@ -47,14 +52,14 @@ func (s *ClusterService) DeleteCluster(ctx context.Context, name string) error {
 }
 
 // AddClusterViaRegist 以注册方式添加集群
-func (s *ClusterService) AddClusterViaRegist(ctx context.Context, name string) {
+func (s *clusterServiceImpl) AddClusterViaRegist(ctx context.Context, name string) {
 }
 
 // RegistCluster 处理集群注册
-func (s *ClusterService) RegistCluster(name, cfg string) {}
+func (s *clusterServiceImpl) RegistCluster(name, cfg string) {}
 
 // EnablePlugin 开启插件
-func (s *ClusterService) EnablePlugin(name, plugin string) {}
+func (s *clusterServiceImpl) EnablePlugin(name, plugin string) {}
 
 // DisablePlugin 关闭插件
-func (s *ClusterService) DisablePlugin(name, plugin string) {}
+func (s *clusterServiceImpl) DisablePlugin(name, plugin string) {}

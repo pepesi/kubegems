@@ -24,6 +24,8 @@ plugins:
       - module=kubegems.io/kubegems/pkg/apiserver/interfaces/apis
       - lang=go
   - name: openapiv2
-    out: ../openapi-spec
+    out: ../api/openapi-spec
+    strategy: all
     opt:
       - allow_delete_body=true
+      - allow_merge=true,merge_file_name=kubegems

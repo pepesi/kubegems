@@ -10,22 +10,51 @@ import (
 	"kubegems.io/kubegems/pkg/apiserver/options"
 )
 
-type TenantService struct {
-	tenantManager domain.TenantManager
+// TenantService 1. 租户管理 2. 租户成员 3. 租户集群资源管理
+type TenantService interface {
+	CreateTenant(ctx context.Context, req *apis.CreateUpdateTenantReq) (*apis.CreateUpdateTenantResp, error)
+	GetTenant(ctx context.Context, tenant string) (*apis.RetrieveTenantResp, error)
+	ListTenants(ctx context.Context, opts ...options.Option) (*apis.ListTenantResp, error)
+	DeleteTenant(ctx context.Context, name string) error
+	UpdateTenant(ctx context.Context, name string, req *apis.CreateUpdateTenantReq) error
+	AddMember(tenantName, userName, role string) error
+	RemoveMember(tenantName, userName string) error
+	UpdateMemberRole(tenantName, userName, role string) error
+	ListMembers(tenantName string, opts ...options.Option) ([]*model.User, error)
+	getTenantUser(tenantName, userName string) (tenant *model.Tenant, user *model.User, err error)
+	CreateTenantClusterQuota(tenantName, clusterName string, req *apis.CreateTenantClusterQuotaReq) (*apis.CreateTenantClusterQuotaResp, error)
+	ModifyTenantClusterQuota(tenantName, clusterName string, quota model.Quota) error
+	getTenantCluster(tenantName, clusterName string) (tenant *model.Tenant, cluster *model.Cluster, err error)
 }
 
-// 租户聚合
-// 租户管理
-// 租户成员
-// 租户集群资源管理
+type tenantServiceImpl struct {
+	tenantManager domain.TenantManager
+	tenantRepo    repository.GenericRepo[*model.Tenant]
+	tenantRelRepo repository.GenericRepo[*model.TenantUserRel]
+	userRepo      repository.GenericRepo[*model.User]
+	clusterRepo   repository.GenericRepo[*model.Cluster]
+	quotaRepo     repository.GenericRepo[*model.Quota]
+}
 
-func NewTenantService(mgr domain.TenantManager) *TenantService {
-	return &TenantService{
+func NewTenantService(
+	mgr domain.TenantManager,
+	tenantRepo repository.GenericRepo[*model.Tenant],
+	tenantRelRepo repository.GenericRepo[*model.TenantUserRel],
+	userRepo repository.GenericRepo[*model.User],
+	clusterRepo repository.GenericRepo[*model.Cluster],
+	quotaRepo repository.GenericRepo[*model.Quota],
+) TenantService {
+	return &tenantServiceImpl{
 		tenantManager: mgr,
+		tenantRepo:    tenantRepo,
+		tenantRelRepo: tenantRelRepo,
+		userRepo:      userRepo,
+		clusterRepo:   clusterRepo,
+		quotaRepo:     quotaRepo,
 	}
 }
 
-func (s *TenantService) CreateTenant(ctx context.Context, req *apis.CreateUpdateTenantReq) (*apis.CreateUpdateTenantResp, error) {
+func (s *tenantServiceImpl) CreateTenant(ctx context.Context, req *apis.CreateUpdateTenantReq) (*apis.CreateUpdateTenantResp, error) {
 	var (
 		tenant  model.Tenant
 		created apis.CreateUpdateTenantResp
@@ -38,7 +67,7 @@ func (s *TenantService) CreateTenant(ctx context.Context, req *apis.CreateUpdate
 	return &created, err
 }
 
-func (s *TenantService) GetTenant(ctx context.Context, tenant string) (*apis.RetrieveTenantResp, error) {
+func (s *tenantServiceImpl) GetTenant(ctx context.Context, tenant string) (*apis.RetrieveTenantResp, error) {
 	var resp apis.RetrieveTenantResp
 	tenantInstance, err := s.tenantManager.GetTenant(ctx, tenant)
 	if err != nil {
@@ -52,7 +81,7 @@ func (s *TenantService) GetTenant(ctx context.Context, tenant string) (*apis.Ret
 
 }
 
-func (s *TenantService) ListTenants(ctx context.Context, opts ...options.Option) (*apis.ListTenantResp, error) {
+func (s *tenantServiceImpl) ListTenants(ctx context.Context, opts ...options.Option) (*apis.ListTenantResp, error) {
 	var resp apis.ListTenantResp
 	tenants, err := s.tenantManager.ListTenant(ctx, opts...)
 	if err != nil {
@@ -71,11 +100,11 @@ func (s *TenantService) ListTenants(ctx context.Context, opts ...options.Option)
 	return &resp, nil
 }
 
-func (s *TenantService) DeleteTenant(ctx context.Context, name string) error {
+func (s *tenantServiceImpl) DeleteTenant(ctx context.Context, name string) error {
 	return s.tenantManager.DeleteTenant(ctx, options.Equal("name", name))
 }
 
-func (s *TenantService) UpdateTenant(ctx context.Context, name string, req *apis.CreateUpdateTenantReq) error {
+func (s *tenantServiceImpl) UpdateTenant(ctx context.Context, name string, req *apis.CreateUpdateTenantReq) error {
 	t := &model.Tenant{
 		Name:    req.Name,
 		Remark:  req.Remark,
@@ -84,22 +113,7 @@ func (s *TenantService) UpdateTenant(ctx context.Context, name string, req *apis
 	return s.tenantManager.ModifyTenant(ctx, name, t)
 }
 
-type TenantMemberService struct {
-	tenantRepo    repository.GenericRepo[*model.Tenant]
-	tenantRelRepo repository.GenericRepo[*model.TenantUserRel]
-	userRepo      repository.GenericRepo[*model.User]
-}
-
-func NewTenantMemberService(tenantRepo repository.GenericRepo[*model.Tenant], tenantRelRepo repository.GenericRepo[*model.TenantUserRel], userRepo repository.GenericRepo[*model.User]) *TenantMemberService {
-	return &TenantMemberService{
-		tenantRepo:    tenantRepo,
-		tenantRelRepo: tenantRelRepo,
-		userRepo:      userRepo,
-	}
-
-}
-
-func (s *TenantMemberService) AddMember(tenantName, userName, role string) error {
+func (s *tenantServiceImpl) AddMember(tenantName, userName, role string) error {
 	tenant, user, err := s.getTenantUser(tenantName, userName)
 	if err != nil {
 		return err
@@ -108,7 +122,7 @@ func (s *TenantMemberService) AddMember(tenantName, userName, role string) error
 	return mgr.AddMember(context.Background(), user, role)
 }
 
-func (s *TenantMemberService) RemoveMember(tenantName, userName string) error {
+func (s *tenantServiceImpl) RemoveMember(tenantName, userName string) error {
 	tenant, user, err := s.getTenantUser(tenantName, userName)
 	if err != nil {
 		return err
@@ -117,7 +131,7 @@ func (s *TenantMemberService) RemoveMember(tenantName, userName string) error {
 	return mgr.RemoveMember(context.Background(), user)
 }
 
-func (s *TenantMemberService) UpdateMemberRole(tenantName, userName, role string) error {
+func (s *tenantServiceImpl) UpdateMemberRole(tenantName, userName, role string) error {
 	tenant, user, err := s.getTenantUser(tenantName, userName)
 	if err != nil {
 		return err
@@ -126,7 +140,7 @@ func (s *TenantMemberService) UpdateMemberRole(tenantName, userName, role string
 	return mgr.ModifyMemberRole(context.Background(), user, role)
 }
 
-func (s *TenantMemberService) ListMembers(tenantName string, opts ...options.Option) ([]*model.User, error) {
+func (s *tenantServiceImpl) ListMembers(tenantName string, opts ...options.Option) ([]*model.User, error) {
 	tenant, err := s.tenantRepo.Get(options.Equal("name", tenantName))
 	if err != nil {
 		return nil, err
@@ -135,7 +149,7 @@ func (s *TenantMemberService) ListMembers(tenantName string, opts ...options.Opt
 	return mgr.ListMember(context.Background(), opts...)
 }
 
-func (s *TenantMemberService) getTenantUser(tenantName, userName string) (tenant *model.Tenant, user *model.User, err error) {
+func (s *tenantServiceImpl) getTenantUser(tenantName, userName string) (tenant *model.Tenant, user *model.User, err error) {
 	tenant, err = s.tenantRepo.Get(options.Equal("name", tenantName))
 	if err != nil {
 		return
@@ -144,21 +158,7 @@ func (s *TenantMemberService) getTenantUser(tenantName, userName string) (tenant
 	return
 }
 
-type TenantResourceQuotaService struct {
-	tenantRepo  repository.GenericRepo[*model.Tenant]
-	clusterRepo repository.GenericRepo[*model.Cluster]
-	quotaRepo   repository.GenericRepo[*model.Quota]
-}
-
-func NewTenantResourceQuotaService(tenantRepo repository.GenericRepo[*model.Tenant], clusterRepo repository.GenericRepo[*model.Cluster], quotaRepo repository.GenericRepo[*model.Quota]) *TenantResourceQuotaService {
-	return &TenantResourceQuotaService{
-		tenantRepo:  tenantRepo,
-		clusterRepo: clusterRepo,
-		quotaRepo:   quotaRepo,
-	}
-}
-
-func (s *TenantResourceQuotaService) CreateTenantClusterQuota(tenantName, clusterName string, req *apis.CreateTenantClusterQuotaReq) (*apis.CreateTenantClusterQuotaResp, error) {
+func (s *tenantServiceImpl) CreateTenantClusterQuota(tenantName, clusterName string, req *apis.CreateTenantClusterQuotaReq) (*apis.CreateTenantClusterQuotaResp, error) {
 	tenant, cluster, err := s.getTenantCluster(tenantName, clusterName)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (s *TenantResourceQuotaService) CreateTenantClusterQuota(tenantName, cluste
 	return &resp, mgr.CreateQuota(quota)
 }
 
-func (s *TenantResourceQuotaService) ModifyTenantClusterQuota(tenantName, clusterName string, quota model.Quota) error {
+func (s *tenantServiceImpl) ModifyTenantClusterQuota(tenantName, clusterName string, quota model.Quota) error {
 	tenant, _, err := s.getTenantCluster(tenantName, clusterName)
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func (s *TenantResourceQuotaService) ModifyTenantClusterQuota(tenantName, cluste
 	return mgr.UpdateQuota(quota)
 }
 
-func (s *TenantResourceQuotaService) getTenantCluster(tenantName, clusterName string) (tenant *model.Tenant, cluster *model.Cluster, err error) {
+func (s *tenantServiceImpl) getTenantCluster(tenantName, clusterName string) (tenant *model.Tenant, cluster *model.Cluster, err error) {
 	tenant, err = s.tenantRepo.Get(options.Equal("name", tenantName))
 	if err != nil {
 		return

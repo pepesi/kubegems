@@ -9,33 +9,28 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	gw "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1" // Update
+	v1 "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1"
 )
 
 var (
-	// command-line options:
-	// gRPC server endpoint
 	grpcServerEndpoint = flag.String("grpc-server-endpoint", "localhost:9090", "gRPC server endpoint")
 )
 
-func RunGw() {
+func RunHTTP() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// Register gRPC server endpoint
-	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	if err := gw.RegisterTenantServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
+	if err := v1.RegisterTenantServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
 		panic(err)
 	}
-	if err := gw.RegisterClusterServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
+	if err := v1.RegisterClusterServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
 		panic(err)
 	}
-	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	err := http.ListenAndServe(":8081", mux)
-	if err != nil {
+
+	if err := http.ListenAndServe(":8081", mux); err != nil {
 		panic(err)
 	}
 }

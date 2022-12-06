@@ -66,18 +66,14 @@ func (svc *TenantHTTPService) WebService() *restful.WebService {
 	return ws
 }
 
-func NewTenantHTTPInterface(tenantSvc *agg_services.TenantService, memberSvc *agg_services.TenantMemberService, quotaSvc *agg_services.TenantResourceQuotaService) *TenantHTTPInterface {
+func NewTenantHTTPInterface(tenantSvc agg_services.TenantService) *TenantHTTPInterface {
 	return &TenantHTTPInterface{
 		tenantSvc: tenantSvc,
-		memberSvc: memberSvc,
-		quotaSvc:  quotaSvc,
 	}
 }
 
 type TenantHTTPInterface struct {
-	tenantSvc *agg_services.TenantService
-	memberSvc *agg_services.TenantMemberService
-	quotaSvc  *agg_services.TenantResourceQuotaService
+	tenantSvc agg_services.TenantService
 }
 
 func (iface *TenantHTTPInterface) getTenant(req *restful.Request, resp *restful.Response) {
@@ -149,7 +145,7 @@ func (iface *TenantHTTPInterface) createTenantClusterQuota(req *restful.Request,
 	if err := req.ReadEntity(reqdata); err != nil {
 		resp.WriteError(400, err)
 	}
-	respdata, err := iface.quotaSvc.CreateTenantClusterQuota(tenantName, clusterName, reqdata)
+	respdata, err := iface.tenantSvc.CreateTenantClusterQuota(tenantName, clusterName, reqdata)
 	if err != nil {
 		resp.WriteError(400, err)
 		return
@@ -180,5 +176,5 @@ func (iface *TenantHTTPInterface) deleteMember(req *restful.Request, resp *restf
 
 func (iface *TenantHTTPInterface) listMembers(req *restful.Request, resp *restful.Response) {
 	tenantName := req.PathParameter("tenant")
-	iface.memberSvc.ListMembers(tenantName)
+	iface.tenantSvc.ListMembers(tenantName)
 }

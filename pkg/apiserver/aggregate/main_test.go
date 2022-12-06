@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 	"kubegems.io/kubegems/pkg/apiserver/domain/model"
 	"kubegems.io/kubegems/pkg/apiserver/domain/repository"
+	"kubegems.io/kubegems/pkg/apiserver/domain/service"
 	"kubegems.io/kubegems/pkg/apiserver/infrastructure"
 	"kubegems.io/kubegems/pkg/apiserver/infrastructure/orm"
 )
@@ -22,6 +23,8 @@ var (
 	tenantRelRepo repository.GenericRepo[*model.TenantUserRel]
 	userRepo      repository.GenericRepo[*model.User]
 	clusterRepo   repository.GenericRepo[*model.Cluster]
+	quotaRepo     repository.GenericRepo[*model.Quota]
+	tenantMgr     service.TenantManager
 )
 
 func TestMain(m *testing.M) {
@@ -45,6 +48,7 @@ func TestMain(m *testing.M) {
 	tenantRelRepo = repository.RepoFor(&model.TenantUserRel{}, infraOpts)
 	userRepo = repository.RepoFor(&model.User{}, infraOpts)
 	clusterRepo = repository.RepoFor(&model.Cluster{}, infraOpts)
+	tenantMgr = service.NewTenantManager(tenantRepo)
 
 	fixtures, err = testfixtures.New(
 		testfixtures.Database(db),

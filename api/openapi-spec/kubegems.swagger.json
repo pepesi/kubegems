@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "kubegems/services/v1/root.proto",
+    "title": "kubegems/datas/v1/cluster.proto",
     "version": "version not set"
   },
   "tags": [
@@ -82,6 +82,48 @@
       }
     },
     "/v1/tenant": {
+      "get": {
+        "operationId": "TenantService_ListTenant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListTenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      },
       "post": {
         "operationId": "TenantService_CreateTenant",
         "responses": {
@@ -148,6 +190,62 @@
         "tags": [
           "TenantService"
         ]
+      },
+      "put": {
+        "operationId": "TenantService_ModifyTenant",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ModifyTenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "tenant.id",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "tenant.name",
+            "description": "tenant name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.intro",
+            "description": "intro of this tenant",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.enabled",
+            "description": "is enabled this tenant",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
       }
     }
   },
@@ -183,10 +281,12 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "The name of cluster you want to use in kubegems"
         },
         "kubeconfig": {
-          "type": "string"
+          "type": "string",
+          "description": "kubeconfig of the cluster"
         }
       }
     },
@@ -265,6 +365,36 @@
         }
       }
     },
+    "v1ListTenantResponse": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "search": {
+          "type": "string"
+        },
+        "tenats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Tenant"
+          }
+        }
+      }
+    },
+    "v1ModifyTenantResponse": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/v1Tenant"
+        }
+      }
+    },
     "v1Tenant": {
       "type": "object",
       "properties": {
@@ -273,13 +403,16 @@
           "format": "int64"
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "tenant name"
         },
-        "remark": {
-          "type": "string"
+        "intro": {
+          "type": "string",
+          "description": "intro of this tenant"
         },
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "is enabled this tenant"
         }
       }
     }

@@ -1,0 +1,20 @@
+syntax = "proto3";
+package kubegems.services.v1;
+option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
+import "google/api/annotations.proto";
+import "kubegems/datas/v1/cluster.proto";
+
+service ClusterService {
+    rpc CreateCluster(kubegems.datas.v1.CreateClusterRequest) returns (kubegems.datas.v1.CreateClusterResponse) {
+        option (google.api.http) = {
+            post: "/v1/cluster"
+            body: "*"
+        };
+    }
+    rpc DeleteCluster(kubegems.datas.v1.DeleteClusterRequest) returns (kubegems.datas.v1.DeleteClusterResponse) {
+        option (google.api.http) = {
+            delete: "/v1/cluster"
+            body: "*"
+        };
+    }
+}

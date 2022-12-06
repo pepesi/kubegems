@@ -15,28 +15,17 @@
 package main
 
 import (
-	"kubegems.io/kubegems/pkg/apiserver/infrastructure/orm"
+	"os"
+
 	"kubegems.io/kubegems/pkg/apiserver/interfaces"
 )
 
 func main() {
-	// gateway()
-	grpc()
-
-}
-
-func T() {
-	db := orm.Init()
-	println("start server")
-	if e := interfaces.InitHTTPServer(db); e != nil {
-		panic(e)
+	if os.Getenv("T") == "http" {
+		interfaces.RunHTTP()
+	} else if os.Getenv("T") == "grpc" {
+		interfaces.RunHTTP()
+	} else {
+		os.Exit(255)
 	}
-}
-
-func gateway() {
-	interfaces.RunGw()
-}
-
-func grpc() {
-	interfaces.RunGrpc()
 }

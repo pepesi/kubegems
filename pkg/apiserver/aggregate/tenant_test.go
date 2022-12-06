@@ -6,8 +6,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestTenantMemberService_AddMember(t *testing.T) {
-	s := NewTenantMemberService(tenantRepo, tenantRelRepo, userRepo)
+func TestTenantService_AddMember(t *testing.T) {
+	s := NewTenantService(tenantMgr, tenantRepo, tenantRelRepo, userRepo, clusterRepo, quotaRepo)
 	Convey("Give tenant name, user name and role", t, func() {
 		Convey("When tenant and user both exists", func() {
 			tenantName := "kubegems"
@@ -44,8 +44,8 @@ func TestTenantMemberService_AddMember(t *testing.T) {
 	})
 }
 
-func TestTenantMemberService_RemoveMember(t *testing.T) {
-	s := NewTenantMemberService(tenantRepo, tenantRelRepo, userRepo)
+func TestTenantService_RemoveMember(t *testing.T) {
+	s := NewTenantService(tenantMgr, tenantRepo, tenantRelRepo, userRepo, clusterRepo, quotaRepo)
 	Convey("Give tenant name and user name", t, func() {
 		Convey("When tenant not exist and user exist", func() {
 			tenantName := "fake_kubegems"
@@ -78,8 +78,8 @@ func TestTenantMemberService_RemoveMember(t *testing.T) {
 	})
 }
 
-func TestTenantMemberService_UpdateMemberRole(t *testing.T) {
-	s := NewTenantMemberService(tenantRepo, tenantRelRepo, userRepo)
+func TestTenantService_UpdateMemberRole(t *testing.T) {
+	s := NewTenantService(tenantMgr, tenantRepo, tenantRelRepo, userRepo, clusterRepo, quotaRepo)
 	Convey("Give tenant name and user name", t, func() {
 		Convey("When tenant not exist and user exist", func() {
 			tenantName := "fake_kubegems"
@@ -114,8 +114,8 @@ func TestTenantMemberService_UpdateMemberRole(t *testing.T) {
 	})
 }
 
-func TestTenantMemberService_ListMembers(t *testing.T) {
-	s := NewTenantMemberService(tenantRepo, tenantRelRepo, userRepo)
+func TestTenantService_ListMembers(t *testing.T) {
+	s := NewTenantService(tenantMgr, tenantRepo, tenantRelRepo, userRepo, clusterRepo, quotaRepo)
 	Convey("Give tenant name", t, func() {
 		Convey("When tenant exists, list tenant members 2", func() {
 			tenantName := "github"

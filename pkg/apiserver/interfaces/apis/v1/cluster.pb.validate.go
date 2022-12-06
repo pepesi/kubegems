@@ -180,7 +180,16 @@ func (m *CreateClusterRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for Kubeconfig
+	if utf8.RuneCountInString(m.GetKubeconfig()) < 30 {
+		err := CreateClusterRequestValidationError{
+			field:  "Kubeconfig",
+			reason: "value length must be at least 30 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	if len(errors) > 0 {
 		return CreateClusterRequestMultiError(errors)
