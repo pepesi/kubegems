@@ -1,0 +1,28 @@
+syntax = "proto3";
+package kubegems.datas.v1;
+option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
+
+// 200 0 00: 正常code
+// 400 3 01: 用户侧 没有数据权限
+// 400 4 01: 用户侧输入静态表单验证失败
+// 400 4 02: 用户侧输入动态验证失败
+// 500 1 01: 内部组件 网络通信 异常, 内部组件网络不通, 调用侧生成
+// 500 1 02: 内部组件 网络通信 异常, 内部组件网络调用超时, 调用侧生成
+// 500 2 01: 内部组件 调用 异常, 内部组件调用认证失败, 调用侧根据返回生成
+// 500 2 02: 内部组件 调用 异常, 内部组件调用token过期, 调用侧根据返回生成
+
+enum StatusCode {
+    STATUS_CODE_UNSPECIFIED = 0;
+    STATUS_CODE_NO_PERM = 1;
+    STATUS_CODE_BAD_REQUEST = 2;
+    STATUS_CODE_INVALID_INPUT = 3;
+    STATUS_CODE_INTERNAL_NET_ERR = 4;
+    STATUS_CODE_INTERNAL_TIMEOUT = 5;
+    STATUS_CODE_INTERNAL_AUTHFAIL = 6;
+    STATUS_CODE_INTERNAL_EXPIRE = 7;
+  }
+
+message CommonResponse {
+    StatusCode code = 1;
+    string message = 2;
+}

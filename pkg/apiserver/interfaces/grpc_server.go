@@ -11,9 +11,13 @@ import (
 )
 
 func RunGrpc() {
-	server := &serverImpl{}
+	tenantServer := &tenantImpl{}
+	clusterServer := &clusterImpl{}
 	s := grpc.NewServer()
-	gw.RegisterKubegemsServiceServer(s, server)
+
+	gw.RegisterClusterServiceServer(s, clusterServer)
+	gw.RegisterTenantServiceServer(s, tenantServer)
+
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
 		panic(err)
@@ -23,11 +27,23 @@ func RunGrpc() {
 	}
 }
 
-type serverImpl struct {
-	gw.UnimplementedKubegemsServiceServer
+type clusterImpl struct {
+	gw.UnimplementedClusterServiceServer
 }
 
-func (s *serverImpl) CreateTenant(ctx context.Context, req *gw.CreateTenantRequest) (*gw.CreateTenantResponse, error) {
+func (s *clusterImpl) CreateCluster(ctx context.Context, req *gw.CreateClusterRequest) (*gw.CreateClusterResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *clusterImpl) DeleteCluster(ctx context.Context, req *gw.DeleteClusterRequest) (*gw.DeleteClusterResponse, error) {
+	return nil, errors.New("not implemented")
+}
+
+type tenantImpl struct {
+	gw.UnimplementedTenantServiceServer
+}
+
+func (s *tenantImpl) CreateTenant(ctx context.Context, req *gw.CreateTenantRequest) (*gw.CreateTenantResponse, error) {
 	r := &gw.CreateTenantResponse{
 		Succeed: false,
 		Message: "xxxx",
@@ -35,10 +51,6 @@ func (s *serverImpl) CreateTenant(ctx context.Context, req *gw.CreateTenantReque
 	return r, nil
 }
 
-func (s *serverImpl) DeleteTenant(ctx context.Context, req *gw.DeleteTenantRequest) (*gw.DeleteTenantResponse, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (s *serverImpl) CreateCluster(ctx context.Context, req *gw.CreateClusterRequest) (*gw.CreateClusterResponse, error) {
+func (s *tenantImpl) DeleteTenant(ctx context.Context, req *gw.DeleteTenantRequest) (*gw.DeleteTenantResponse, error) {
 	return nil, errors.New("not implemented")
 }

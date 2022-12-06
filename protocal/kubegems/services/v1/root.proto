@@ -1,0 +1,36 @@
+syntax = "proto3";
+package kubegems.services.v1;
+option go_package = "kubegems.io/kubegems/pkg/apiserver/interfaces/apis/v1";
+import "google/api/annotations.proto";
+import "kubegems/datas/v1/cluster.proto";
+import "kubegems/datas/v1/tenant.proto";
+
+service ClusterService {
+    rpc CreateCluster(kubegems.datas.v1.CreateClusterRequest) returns (kubegems.datas.v1.CreateClusterResponse) {
+        option (google.api.http) = {
+            post: "/v1/cluster"
+            body: "*"
+        };
+    }
+    rpc DeleteCluster(kubegems.datas.v1.DeleteClusterRequest) returns (kubegems.datas.v1.DeleteClusterResponse) {
+        option (google.api.http) = {
+            delete: "/v1/cluster"
+            body: "*"
+        };
+    }
+}
+
+service TenantService {
+    rpc CreateTenant(kubegems.datas.v1.CreateTenantRequest) returns (kubegems.datas.v1.CreateTenantResponse) {
+        option (google.api.http) = {
+            post: "/v1/tenant"
+            body: "*"
+        };
+    };
+    rpc DeleteTenant(kubegems.datas.v1.DeleteTenantRequest) returns (kubegems.datas.v1.DeleteTenantResponse) {
+        option (google.api.http) = {
+            delete: "/v1/tenant/{name}"
+        };
+    };
+    // todo: add more service below
+}

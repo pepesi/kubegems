@@ -27,13 +27,14 @@ func RunGw() {
 	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err := gw.RegisterKubegemsServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
-	if err != nil {
+	if err := gw.RegisterTenantServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
 		panic(err)
 	}
-
+	if err := gw.RegisterClusterServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
+		panic(err)
+	}
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	err = http.ListenAndServe(":8081", mux)
+	err := http.ListenAndServe(":8081", mux)
 	if err != nil {
 		panic(err)
 	}

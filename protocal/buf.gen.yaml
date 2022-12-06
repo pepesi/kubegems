@@ -1,20 +1,23 @@
 version: v1
 plugins:
   - name: go
-    out: pkg/apiserver/interfaces/apis/
+    out: ../pkg/apiserver/interfaces/apis/
     opt:
       - paths=import
       - module=kubegems.io/kubegems/pkg/apiserver/interfaces/apis
   - name: go-grpc
-    out: pkg/apiserver/interfaces/apis/
+    out: ../pkg/apiserver/interfaces/apis/
     opt:
       - paths=import
       - module=kubegems.io/kubegems/pkg/apiserver/interfaces/apis
   - name: grpc-gateway
-    out: pkg/apiserver/interfaces/apis/
+    out: ../pkg/apiserver/interfaces/apis/
     opt:
       - paths=import
       - module=kubegems.io/kubegems/pkg/apiserver/interfaces/apis
       - generate_unbound_methods=true
+      - allow_delete_body=true
   - name: openapiv2
-    out: openapi-spec
+    out: ../openapi-spec
+    opt:
+      - allow_delete_body=true

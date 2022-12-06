@@ -14,160 +14,246 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// KubegemsServiceClient is the client API for KubegemsService service.
+// ClusterServiceClient is the client API for ClusterService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type KubegemsServiceClient interface {
-	CreateTenant(ctx context.Context, in *CreateTenantRequest, opts ...grpc.CallOption) (*CreateTenantResponse, error)
-	DeleteTenant(ctx context.Context, in *DeleteTenantRequest, opts ...grpc.CallOption) (*DeleteTenantResponse, error)
+type ClusterServiceClient interface {
 	CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error)
+	DeleteCluster(ctx context.Context, in *DeleteClusterRequest, opts ...grpc.CallOption) (*DeleteClusterResponse, error)
 }
 
-type kubegemsServiceClient struct {
+type clusterServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewKubegemsServiceClient(cc grpc.ClientConnInterface) KubegemsServiceClient {
-	return &kubegemsServiceClient{cc}
+func NewClusterServiceClient(cc grpc.ClientConnInterface) ClusterServiceClient {
+	return &clusterServiceClient{cc}
 }
 
-func (c *kubegemsServiceClient) CreateTenant(ctx context.Context, in *CreateTenantRequest, opts ...grpc.CallOption) (*CreateTenantResponse, error) {
-	out := new(CreateTenantResponse)
-	err := c.cc.Invoke(ctx, "/protos.services.v1.KubegemsService/CreateTenant", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *kubegemsServiceClient) DeleteTenant(ctx context.Context, in *DeleteTenantRequest, opts ...grpc.CallOption) (*DeleteTenantResponse, error) {
-	out := new(DeleteTenantResponse)
-	err := c.cc.Invoke(ctx, "/protos.services.v1.KubegemsService/DeleteTenant", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *kubegemsServiceClient) CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error) {
+func (c *clusterServiceClient) CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error) {
 	out := new(CreateClusterResponse)
-	err := c.cc.Invoke(ctx, "/protos.services.v1.KubegemsService/CreateCluster", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/kubegems.services.v1.ClusterService/CreateCluster", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// KubegemsServiceServer is the server API for KubegemsService service.
-// All implementations must embed UnimplementedKubegemsServiceServer
+func (c *clusterServiceClient) DeleteCluster(ctx context.Context, in *DeleteClusterRequest, opts ...grpc.CallOption) (*DeleteClusterResponse, error) {
+	out := new(DeleteClusterResponse)
+	err := c.cc.Invoke(ctx, "/kubegems.services.v1.ClusterService/DeleteCluster", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ClusterServiceServer is the server API for ClusterService service.
+// All implementations must embed UnimplementedClusterServiceServer
 // for forward compatibility
-type KubegemsServiceServer interface {
-	CreateTenant(context.Context, *CreateTenantRequest) (*CreateTenantResponse, error)
-	DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error)
+type ClusterServiceServer interface {
 	CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error)
-	mustEmbedUnimplementedKubegemsServiceServer()
+	DeleteCluster(context.Context, *DeleteClusterRequest) (*DeleteClusterResponse, error)
+	mustEmbedUnimplementedClusterServiceServer()
 }
 
-// UnimplementedKubegemsServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedKubegemsServiceServer struct {
+// UnimplementedClusterServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedClusterServiceServer struct {
 }
 
-func (UnimplementedKubegemsServiceServer) CreateTenant(context.Context, *CreateTenantRequest) (*CreateTenantResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateTenant not implemented")
-}
-func (UnimplementedKubegemsServiceServer) DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTenant not implemented")
-}
-func (UnimplementedKubegemsServiceServer) CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error) {
+func (UnimplementedClusterServiceServer) CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCluster not implemented")
 }
-func (UnimplementedKubegemsServiceServer) mustEmbedUnimplementedKubegemsServiceServer() {}
+func (UnimplementedClusterServiceServer) DeleteCluster(context.Context, *DeleteClusterRequest) (*DeleteClusterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCluster not implemented")
+}
+func (UnimplementedClusterServiceServer) mustEmbedUnimplementedClusterServiceServer() {}
 
-// UnsafeKubegemsServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to KubegemsServiceServer will
+// UnsafeClusterServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ClusterServiceServer will
 // result in compilation errors.
-type UnsafeKubegemsServiceServer interface {
-	mustEmbedUnimplementedKubegemsServiceServer()
+type UnsafeClusterServiceServer interface {
+	mustEmbedUnimplementedClusterServiceServer()
 }
 
-func RegisterKubegemsServiceServer(s grpc.ServiceRegistrar, srv KubegemsServiceServer) {
-	s.RegisterService(&KubegemsService_ServiceDesc, srv)
+func RegisterClusterServiceServer(s grpc.ServiceRegistrar, srv ClusterServiceServer) {
+	s.RegisterService(&ClusterService_ServiceDesc, srv)
 }
 
-func _KubegemsService_CreateTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateTenantRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KubegemsServiceServer).CreateTenant(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.services.v1.KubegemsService/CreateTenant",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KubegemsServiceServer).CreateTenant(ctx, req.(*CreateTenantRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KubegemsService_DeleteTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteTenantRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KubegemsServiceServer).DeleteTenant(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protos.services.v1.KubegemsService/DeleteTenant",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KubegemsServiceServer).DeleteTenant(ctx, req.(*DeleteTenantRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KubegemsService_CreateCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ClusterService_CreateCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateClusterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KubegemsServiceServer).CreateCluster(ctx, in)
+		return srv.(ClusterServiceServer).CreateCluster(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.services.v1.KubegemsService/CreateCluster",
+		FullMethod: "/kubegems.services.v1.ClusterService/CreateCluster",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KubegemsServiceServer).CreateCluster(ctx, req.(*CreateClusterRequest))
+		return srv.(ClusterServiceServer).CreateCluster(ctx, req.(*CreateClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// KubegemsService_ServiceDesc is the grpc.ServiceDesc for KubegemsService service.
+func _ClusterService_DeleteCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClusterServiceServer).DeleteCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kubegems.services.v1.ClusterService/DeleteCluster",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClusterServiceServer).DeleteCluster(ctx, req.(*DeleteClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ClusterService_ServiceDesc is the grpc.ServiceDesc for ClusterService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var KubegemsService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "protos.services.v1.KubegemsService",
-	HandlerType: (*KubegemsServiceServer)(nil),
+var ClusterService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "kubegems.services.v1.ClusterService",
+	HandlerType: (*ClusterServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateTenant",
-			Handler:    _KubegemsService_CreateTenant_Handler,
-		},
-		{
-			MethodName: "DeleteTenant",
-			Handler:    _KubegemsService_DeleteTenant_Handler,
-		},
-		{
 			MethodName: "CreateCluster",
-			Handler:    _KubegemsService_CreateCluster_Handler,
+			Handler:    _ClusterService_CreateCluster_Handler,
+		},
+		{
+			MethodName: "DeleteCluster",
+			Handler:    _ClusterService_DeleteCluster_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "protos/services/v1/root.proto",
+	Metadata: "kubegems/services/v1/root.proto",
+}
+
+// TenantServiceClient is the client API for TenantService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type TenantServiceClient interface {
+	CreateTenant(ctx context.Context, in *CreateTenantRequest, opts ...grpc.CallOption) (*CreateTenantResponse, error)
+	DeleteTenant(ctx context.Context, in *DeleteTenantRequest, opts ...grpc.CallOption) (*DeleteTenantResponse, error)
+}
+
+type tenantServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTenantServiceClient(cc grpc.ClientConnInterface) TenantServiceClient {
+	return &tenantServiceClient{cc}
+}
+
+func (c *tenantServiceClient) CreateTenant(ctx context.Context, in *CreateTenantRequest, opts ...grpc.CallOption) (*CreateTenantResponse, error) {
+	out := new(CreateTenantResponse)
+	err := c.cc.Invoke(ctx, "/kubegems.services.v1.TenantService/CreateTenant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantServiceClient) DeleteTenant(ctx context.Context, in *DeleteTenantRequest, opts ...grpc.CallOption) (*DeleteTenantResponse, error) {
+	out := new(DeleteTenantResponse)
+	err := c.cc.Invoke(ctx, "/kubegems.services.v1.TenantService/DeleteTenant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TenantServiceServer is the server API for TenantService service.
+// All implementations must embed UnimplementedTenantServiceServer
+// for forward compatibility
+type TenantServiceServer interface {
+	CreateTenant(context.Context, *CreateTenantRequest) (*CreateTenantResponse, error)
+	DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error)
+	mustEmbedUnimplementedTenantServiceServer()
+}
+
+// UnimplementedTenantServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedTenantServiceServer struct {
+}
+
+func (UnimplementedTenantServiceServer) CreateTenant(context.Context, *CreateTenantRequest) (*CreateTenantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTenant not implemented")
+}
+func (UnimplementedTenantServiceServer) DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTenant not implemented")
+}
+func (UnimplementedTenantServiceServer) mustEmbedUnimplementedTenantServiceServer() {}
+
+// UnsafeTenantServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TenantServiceServer will
+// result in compilation errors.
+type UnsafeTenantServiceServer interface {
+	mustEmbedUnimplementedTenantServiceServer()
+}
+
+func RegisterTenantServiceServer(s grpc.ServiceRegistrar, srv TenantServiceServer) {
+	s.RegisterService(&TenantService_ServiceDesc, srv)
+}
+
+func _TenantService_CreateTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTenantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantServiceServer).CreateTenant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kubegems.services.v1.TenantService/CreateTenant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantServiceServer).CreateTenant(ctx, req.(*CreateTenantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantService_DeleteTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTenantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantServiceServer).DeleteTenant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kubegems.services.v1.TenantService/DeleteTenant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantServiceServer).DeleteTenant(ctx, req.(*DeleteTenantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// TenantService_ServiceDesc is the grpc.ServiceDesc for TenantService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var TenantService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "kubegems.services.v1.TenantService",
+	HandlerType: (*TenantServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateTenant",
+			Handler:    _TenantService_CreateTenant_Handler,
+		},
+		{
+			MethodName: "DeleteTenant",
+			Handler:    _TenantService_DeleteTenant_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "kubegems/services/v1/root.proto",
 }
