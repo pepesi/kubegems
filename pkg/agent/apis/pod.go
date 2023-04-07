@@ -23,7 +23,7 @@ import (
 	"io"
 	"mime"
 	"mime/multipart"
-	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -317,27 +317,23 @@ func (h *PodHandler) ListDir(c *gin.Context) {
 	podname := c.Param("name")
 	arch, os := h.getPodNodeArch(ctx, namespace, podname)
 	directory := c.DefaultQuery("directory", "/")
-	targetpath := "/tmp/podfsmgr-" + os + arch
-	localfile := "tools/podfsmgr-" + os + arch
-	toolBinExistsCmd := []string{targetpath}
-	_, stderr, err := execCmdOnce(ctx, h.cluster, namespace, podname, request.HeaderOrQuery(c.Request, "container", ""), toolBinExistsCmd)
-	if err != nil {
-		NotOK(c, err)
-		return
-	}
-	if len(stderr) > 0 {
+	targetpath := "/tmp/podfsmgr-" + os + "-" + arch
+	localfile := "tools/podfsmgr-" + os + "-" + arch
+	toolBinExistsCmd := []string{"/bin/sh", "-c", targetpath}
+	_, _, err := execCmdOnce(ctx, h.cluster, namespace, podname, request.HeaderOrQuery(c.Request, "container", ""), toolBinExistsCmd)
+	if err != nil && err.Error() == "command terminated with exit code 127" {
 		fd := FileTransfer{
 			Cluster:   h.cluster,
 			Namespace: namespace,
 			Pod:       podname,
 			Container: paramFromHeaderOrQuery(c, "container", ""),
 		}
-		if err := fd.UploadLocal(c, localfile, targetpath); err != nil {
+		if err := fd.UploadLocal(c, localfile, "/tmp"); err != nil {
 			NotOK(c, err)
 			return
 		}
 	}
-	lscmd := []string{targetpath, "ls", directory}
+	lscmd := []string{"/bin/sh", "-c", targetpath + " ls " + directory}
 	stdout, stderr, err := execCmdOnce(ctx, h.cluster, namespace, podname, request.HeaderOrQuery(c.Request, "container", ""), lscmd)
 	if err != nil {
 		NotOK(c, err)
@@ -452,22 +448,17 @@ func (fd *FileTransfer) Upload(c *gin.Context) error {
 	return fd.upload(c, uploadFormData)
 }
 func (fd *FileTransfer) UploadLocal(ctx context.Context, localfile, dest string) error {
-	fakereq := &http.Request{}
-	_, fileHeader, err := fakereq.FormFile(localfile)
-	if err != nil {
-		return err
-	}
-	uploadFormData := &uploadForm{
+	uploadFormData := &uploadLocalForm{
 		Dest:  dest,
-		Files: []*multipart.FileHeader{fileHeader},
+		Files: []string{localfile},
 	}
 	return fd.upload(ctx, uploadFormData)
 }
 
-func (fd *FileTransfer) upload(ctx context.Context, form *uploadForm) error {
+func (fd *FileTransfer) upload(ctx context.Context, form uploadFormIface) error {
 	r, w := io.Pipe()
 	go form.convertTar(w)
-	command := []string{"tar", "xf", "-", "-C", form.Dest}
+	command := []string{"tar", "xf", "-", "-C", form.destLoc()}
 	pe := PodCmdExecutor{
 		Cluster: fd.Cluster,
 		Pod: client.ObjectKey{
@@ -495,6 +486,10 @@ type uploadForm struct {
 	Files []*multipart.FileHeader `form:"files[]" binding:"required"`
 }
 
+func (uf *uploadForm) destLoc() string {
+	return uf.Dest
+}
+
 func (uf *uploadForm) convertTar(w io.WriteCloser) (err error) {
 	tw := tar.NewWriter(w)
 	for _, file := range uf.Files {
@@ -516,6 +511,44 @@ func (uf *uploadForm) convertTar(w io.WriteCloser) (err error) {
 		return e
 	}
 	return w.Close()
+}
+
+type uploadLocalForm struct {
+	Dest  string
+	Files []string
+}
+
+func (uf *uploadLocalForm) destLoc() string {
+	return uf.Dest
+}
+
+func (uf *uploadLocalForm) convertTar(w io.WriteCloser) (err error) {
+	tw := tar.NewWriter(w)
+	for _, file := range uf.Files {
+		fstat, _ := os.Stat(file)
+		tw.WriteHeader(&tar.Header{
+			Name:    fstat.Name(),
+			Size:    fstat.Size(),
+			ModTime: time.Now(),
+			Mode:    int64(fstat.Mode().Perm()),
+		})
+		fd, err := os.Open(file)
+		if err != nil {
+			return err
+		}
+		io.Copy(tw, fd)
+		fd.Close()
+	}
+	if e := tw.Close(); e != nil {
+		log.Error(e, "tar error")
+		return e
+	}
+	return w.Close()
+}
+
+type uploadFormIface interface {
+	destLoc() string
+	convertTar(w io.WriteCloser) error
 }
 
 type fakeStdoutWriter struct{}
@@ -625,5 +658,8 @@ func execCmdOnce(ctx context.Context, cluster cluster.Interface, namespace, podn
 			Stderr: &stderr,
 		},
 	}
-	return stdout.Bytes(), stderr.Bytes(), pe.Execute(ctx)
+	if err := pe.Execute(ctx); err != nil {
+		return nil, nil, err
+	}
+	return stdout.Bytes(), stderr.Bytes(), nil
 }
